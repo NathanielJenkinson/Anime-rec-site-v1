@@ -17,18 +17,18 @@ async function showRecommendations() {
       ? "Slice of Life"
       : selected.charAt(0).toUpperCase() + selected.slice(1);
 
-  // GraphQL query string (IMPORTANT: no // comments allowed inside here or it breaks)
-  // We swap between tag_in and genre_in depending on isekai
+  // GraphQL query string
+  // Upgrade: request higher quality cover images (extraLarge/large/medium)
   const query = `
     query ($filter: [String!]) {
-      Page(page: 1, perPage: 6) {
+      Page(page: 1, perPage: 10) {
         media(
           ${isIsekai ? "tag_in: $filter" : "genre_in: $filter"},
           type: ANIME,
           sort: POPULARITY_DESC
         ) {
           title { romaji }
-          coverImage { medium }
+          coverImage { extraLarge large medium }
         }
       }
     }
@@ -75,8 +75,16 @@ async function showRecommendations() {
     animeList.forEach(anime => {
       const card = document.createElement("div");
       card.classList.add("anime-card");
+
+      // Upgrade: use the highest quality available, with fallbacks
+      const img =
+        anime.coverImage?.extraLarge ||
+        anime.coverImage?.large ||
+        anime.coverImage?.medium ||
+        "";
+
       card.innerHTML = `
-        <img src="${anime.coverImage.medium}" alt="${anime.title.romaji}">
+        <img loading="lazy" src="${img}" alt="${anime.title.romaji}">
         <p>${anime.title.romaji}</p>
       `;
       grid.appendChild(card);
@@ -92,10 +100,10 @@ function setTheme(themeFromUser) {
   // If user picked one, use it. Otherwise load saved value.
   const theme = themeFromUser || localStorage.getItem("theme") || "csm";
 
-  // Apply to BODY because CSS uses body
+  // Apply to BODY because CSS uses body[data-theme="..."]
   document.body.setAttribute("data-theme", theme);
 
-  // Saves choice
+  // Save choice
   localStorage.setItem("theme", theme);
 
   // Sync dropdown if it exists
@@ -123,12 +131,13 @@ async function loadAnimeList(mode) {
 
   const sort = sortMap[mode] || "POPULARITY_DESC";
 
+  // Upgrade: request higher quality cover images (extraLarge/large/medium)
   const query = `
     query ($sort: [MediaSort]) {
-      Page(page: 1, perPage: 12) {
+      Page(page: 1, perPage: 15) {
         media(type: ANIME, sort: $sort) {
           title { romaji }
-          coverImage { medium }
+          coverImage { extraLarge large medium }
         }
       }
     }
@@ -159,8 +168,16 @@ async function loadAnimeList(mode) {
     animeList.forEach(anime => {
       const card = document.createElement("div");
       card.classList.add("anime-card");
+
+      // Upgrade: highest quality available, with fallbacks
+      const img =
+        anime.coverImage?.extraLarge ||
+        anime.coverImage?.large ||
+        anime.coverImage?.medium ||
+        "";
+
       card.innerHTML = `
-        <img src="${anime.coverImage.medium}" alt="${anime.title.romaji}">
+        <img loading="lazy" src="${img}" alt="${anime.title.romaji}">
         <p>${anime.title.romaji}</p>
       `;
       grid.appendChild(card);

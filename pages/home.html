@@ -26,20 +26,23 @@
   <li><a href="/pages/RecentlyUpdated.html">Recently updated</a></li>
   <li><a href="/pages/TopRated.html">Top rated</a></li>
   <li><a href="/pages/FanFavourites.html">Fan favourites</a></li>
-  <li><a href="/pages/Popular.html">Popular this week</a></li>
+  <li><a href="/pages/Popular.html">Most Popular</a></li>
 </ul>
 
 
 <h2>What is your favourite genre? Let us show you some good recommendations!</h2>
-<select id="genre-recommendations">
+<div class="genre-controls">
+  <select id="genre-recommendations">
     <option value="romance">Romance</option>
     <option value="comedy">Comedy</option>
     <option value="horror">Horror</option>
     <option value="action">Action</option>
     <option value="slice of life">Slice of Life</option>
     <option value="isekai">Isekai</option>
-</select>
-<button onclick="showRecommendations()">Show Recommendations</button>
+  </select>
+  <button onclick="showRecommendations()">Show Recommendations</button>
+</div>
+
 <div id="recommendations-output"></div>
 
 
