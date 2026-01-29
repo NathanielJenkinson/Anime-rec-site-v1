@@ -107,3 +107,67 @@ document.addEventListener("DOMContentLoaded", () => {
   setTheme(); // loads saved theme on every page
 });
 
+async function loadAnimeList(mode) {
+  const output = document.getElementById("recommendations-output");
+  if (!output) return;
+
+  output.innerHTML = "Loading...";
+
+  // Map each page/button to an AniList sort mode
+  const sortMap = {
+    popular: "POPULARITY_DESC",
+    top_rated: "SCORE_DESC",
+    trending: "TRENDING_DESC",
+    newest: "START_DATE_DESC"
+  };
+
+  const sort = sortMap[mode] || "POPULARITY_DESC";
+
+  const query = `
+    query ($sort: [MediaSort]) {
+      Page(page: 1, perPage: 12) {
+        media(type: ANIME, sort: $sort) {
+          title { romaji }
+          coverImage { medium }
+        }
+      }
+    }
+  `;
+
+  const variables = { sort: [sort] };
+
+  try {
+    const res = await fetch("https://graphql.anilist.co", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ query, variables })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.errors) {
+      console.error(data.errors || res.statusText);
+      output.innerHTML = "AniList error (check console).";
+      return;
+    }
+
+    const animeList = data.data.Page.media;
+
+    output.innerHTML = `<h3>${mode.replace("_", " ").toUpperCase()}</h3><div class="anime-grid"></div>`;
+    const grid = output.querySelector(".anime-grid");
+
+    animeList.forEach(anime => {
+      const card = document.createElement("div");
+      card.classList.add("anime-card");
+      card.innerHTML = `
+        <img src="${anime.coverImage.medium}" alt="${anime.title.romaji}">
+        <p>${anime.title.romaji}</p>
+      `;
+      grid.appendChild(card);
+    });
+
+  } catch (e) {
+    console.error(e);
+    output.innerHTML = "Network error (check console).";
+  }
+}
