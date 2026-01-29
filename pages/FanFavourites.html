@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recently Updated Anime</title>
     <link href="/style.css" rel="stylesheet">
-    <script src="script.js"></script>
+    <script src="/script.js"></script>
 </head>
 <body>
 
 <label for="theme-select">Theme:</label>
-<select id="theme-select" onchange="setTheme()">
+<select id="theme-select" onchange="setTheme(this.value)">
     <option value="csm" selected>Chainsaw Man</option>
     <option value="op">One Piece</option>
     <option value="mha">My Hero Academia</option>

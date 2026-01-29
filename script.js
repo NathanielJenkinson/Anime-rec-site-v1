@@ -88,13 +88,22 @@ async function showRecommendations() {
   }
 }
 
+function setTheme(themeFromUser) {
+  // If user picked one, use it. Otherwise load saved value.
+  const theme = themeFromUser || localStorage.getItem("theme") || "csm";
 
-function setTheme() {
-  const theme = document.getElementById("theme-select").value;
+  // Apply to BODY because CSS uses body
   document.body.setAttribute("data-theme", theme);
+
+  // Saves choice
+  localStorage.setItem("theme", theme);
+
+  // Sync dropdown if it exists
+  const themeSelect = document.getElementById("theme-select");
+  if (themeSelect) themeSelect.value = theme;
 }
 
-// Optional: set default on page load (so it matches the selected option)
 document.addEventListener("DOMContentLoaded", () => {
-  setTheme();
+  setTheme(); // loads saved theme on every page
 });
+
