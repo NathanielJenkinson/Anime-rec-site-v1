@@ -1,33 +1,54 @@
+async function showRecommendations() {
+  const genre = document.getElementById("genre-recommendations").value;
+  const output = document.getElementById("recommendations-output");
 
+  output.innerHTML = "Loading recommendations...";
 
-function showRecommendations()
-{
-  var value = document.getElementById("genre-recommendations").value;
-  var output = document.getElementById("recommendations-output");
+  const query = `
+    query ($genre: String!) {
+      Page(page: 1, perPage: 6) {
+        media(genre_in: [$genre], type: ANIME, sort: POPULARITY_DESC) {
+          title {
+            romaji
+          }
+          coverImage {
+            medium
+          }
+        }
+      }
+    }
+  `;
 
+  const variables = { genre: genre };
 
- if (value === "romance") {
-  output.innerHTML = "<h3>Romance Recommendations</h3><ul><li>Your Lie in April</li><li>Toradora!</li><li>Kaguya-sama: Love is War</li></ul>";
-}
+  try {
+    const response = await fetch("https://graphql.anilist.co", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ query, variables })
+    });
 
-else if (value === "comedy") {
-  output.innerHTML = "<h3>Comedy Recommendations</h3><ul><li>Gintama</li><li>Nichijou</li><li>The Disastrous Life of Saiki K.</li></ul>";
-}
+    const data = await response.json();
+    const animeList = data.data.Page.media;
 
-else if (value === "horror") {
-  output.innerHTML = "<h3>Horror Recommendations</h3><ul><li>Another</li><li>Tokyo Ghoul</li><li>Parasyte: The Maxim</li></ul>";
-}
+    output.innerHTML = `<h3>${genre.toUpperCase()} Recommendations</h3><div class="anime-grid"></div>`;
+    const grid = output.querySelector(".anime-grid");
 
-else if (value === "action") {
-  output.innerHTML = "<h3>Action Recommendations</h3><ul><li>Attack on Titan</li><li>Demon Slayer</li><li>Jujutsu Kaisen</li></ul>";
-}
+    animeList.forEach(anime => {
+      const card = document.createElement("div");
+      card.classList.add("anime-card");
+      card.innerHTML = `
+        <img src="${anime.coverImage.medium}" alt="${anime.title.romaji}">
+        <p>${anime.title.romaji}</p>
+      `;
+      grid.appendChild(card);
+    });
 
-else if (value === "slice of life") {
-  output.innerHTML = "<h3>Slice of Life Recommendations</h3><ul><li>Clannad</li><li>Barakamon</li><li>March Comes in Like a Lion</li></ul>";
-}
-
-else if (value === "isekai") {
-  output.innerHTML = "<h3>Isekai Recommendations</h3><ul><li>Re:Zero − Starting Life in Another World</li><li>That Time I Got Reincarnated as a Slime</li><li>No Game No Life</li></ul>";
-}
-
+  } catch (error) {
+    console.error(error);
+    output.innerHTML = "An error occurred while fetching recommendations.";
+  }
 }
