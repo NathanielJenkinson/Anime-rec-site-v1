@@ -87,3 +87,14 @@ async function showRecommendations() {
     output.innerHTML = "An error occurred while fetching recommendations.";
   }
 }
+
+
+function setTheme() {
+  const theme = document.getElementById("theme-select").value;
+  document.body.setAttribute("data-theme", theme);
+}
+
+// Optional: set default on page load (so it matches the selected option)
+document.addEventListener("DOMContentLoaded", () => {
+  setTheme();
+});
