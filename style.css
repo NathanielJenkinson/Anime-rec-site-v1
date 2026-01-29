@@ -1,0 +1,15 @@
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.anime-card {
+  text-align: center;
+}
+
+.anime-card img {
+  width: 100%;
+  border-radius: 8px;
+}

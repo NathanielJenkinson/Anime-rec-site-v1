@@ -1,25 +1,43 @@
 async function showRecommendations() {
-  const genre = document.getElementById("genre-recommendations").value;
+  // Get the value the user selected from the dropdown
+  const selected = document.getElementById("genre-recommendations").value;
+
+  // This is the div where results will be displayed
   const output = document.getElementById("recommendations-output");
 
+  // Let the user know something is happening while we fetch data
   output.innerHTML = "Loading recommendations...";
 
+  // AniList treats "Isekai" as a TAG, not a genre
+  const isIsekai = selected === "isekai";
+
+  // AniList genre names are case-sensitive (e.g., "Slice of Life")
+  const normalizedGenre =
+    selected === "slice of life"
+      ? "Slice of Life"
+      : selected.charAt(0).toUpperCase() + selected.slice(1);
+
+  // GraphQL query string (IMPORTANT: no // comments allowed inside here or it breaks)
+  // We swap between tag_in and genre_in depending on isekai
   const query = `
-    query ($genre: String!) {
+    query ($filter: [String!]) {
       Page(page: 1, perPage: 6) {
-        media(genre_in: [$genre], type: ANIME, sort: POPULARITY_DESC) {
-          title {
-            romaji
-          }
-          coverImage {
-            medium
-          }
+        media(
+          ${isIsekai ? "tag_in: $filter" : "genre_in: $filter"},
+          type: ANIME,
+          sort: POPULARITY_DESC
+        ) {
+          title { romaji }
+          coverImage { medium }
         }
       }
     }
   `;
 
-  const variables = { genre: genre };
+  // Variables must match the query type: [String!]
+  const variables = {
+    filter: [isIsekai ? "Isekai" : normalizedGenre]
+  };
 
   try {
     const response = await fetch("https://graphql.anilist.co", {
@@ -32,9 +50,26 @@ async function showRecommendations() {
     });
 
     const data = await response.json();
+
+    // GraphQL can return errors even when HTTP is 200
+    if (!response.ok || data.errors) {
+      console.error("AniList error:", data.errors || response.statusText);
+      output.innerHTML = "AniList returned an error. Check the console.";
+      return;
+    }
+
     const animeList = data.data.Page.media;
 
-    output.innerHTML = `<h3>${genre.toUpperCase()} Recommendations</h3><div class="anime-grid"></div>`;
+    if (!animeList || animeList.length === 0) {
+      output.innerHTML = `No results found for ${isIsekai ? "Isekai" : normalizedGenre}.`;
+      return;
+    }
+
+    output.innerHTML = `
+      <h3>${isIsekai ? "Isekai" : normalizedGenre} Recommendations</h3>
+      <div class="anime-grid"></div>
+    `;
+
     const grid = output.querySelector(".anime-grid");
 
     animeList.forEach(anime => {
