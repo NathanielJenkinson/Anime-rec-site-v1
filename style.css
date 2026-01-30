@@ -1,8 +1,8 @@
 /* =========================
-   THEME SYSTEM (CSS VARIABLES)
+   COLOR THEMES
    ========================= */
 
-/* Default theme (Chainsaw Man-ish) */
+/* Default theme (Chainsaw Man) */
 :root{
   --bg:#0b0c10;
   --panel:#13151b;
@@ -50,7 +50,7 @@ body[data-theme="mha"]{
 }
 
 /* =========================
-   GLOBAL
+   GLOBAL STYLES
    ========================= */
 
 *{ box-sizing:border-box; }
@@ -158,7 +158,7 @@ ul li a:hover{
 }
 
 /* =========================
-   🎯 GENRE SELECTOR (CENTERED)
+  GENRE SELECTOR (CENTERED)
    ========================= */
 
 .genre-controls{
